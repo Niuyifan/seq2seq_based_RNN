@@ -42,16 +42,16 @@ def build_vocab(data_set):
     return src_vocab, trg_vocab
 
 
-def get_batch_data(data, src_vocab, trg_vocab):
+def get_batch_data(data, indices, start, end, src_vocab, trg_vocab):
     src_batch_list = []
     trg_batch_list = []
 
     src_len = []
     trg_len = []
 
-    for item in data:
-        item_src = item['src']
-        item_trg = item['trg']
+    for i in range(start, end):
+        item_src = data[indices[i]]['src']
+        item_trg = data[indices[i]]['trg']
 
         src_len.append(len(item_src))
         trg_len.append(len(item_trg))

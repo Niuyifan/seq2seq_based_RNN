@@ -13,7 +13,6 @@ from seq2seq import Seq2Seq
 from train_batch import train_batch, epoch_time
 
 
-
 def init_weight(m):
     for name, param in m.named_parameters():
         nn.init.uniform_(param.data, -0.08, 0.08)
@@ -21,7 +20,7 @@ def init_weight(m):
 
 if __name__ == '__main__':
     SEED = 1234
-    BATCH_SIZE = 4
+    BATCH_SIZE = 64
 
     random.seed(SEED)
     np.random.seed(SEED)
@@ -48,8 +47,6 @@ if __name__ == '__main__':
     test_data = create_dataset(de_test_data, spacy_de, en_test_data, spacy_en)
     de_vocab, en_vocab = build_vocab(train_data)
 
-    # train_batch_data = BuildBatch(train_data[:10], BATCH_SIZE, de_vocab, en_vocab, shuffle=False)
-
     INPUT_DIM = len(de_vocab)
     OUTPUT_DIM = len(en_vocab)
     ENC_EMB_DIM = 256
@@ -70,17 +67,16 @@ if __name__ == '__main__':
 
     model.apply(init_weight)
 
-    optimizer = optim.Adam(model.parameters(),lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     criterion = nn.CrossEntropyLoss(ignore_index=0)  # 忽略<pad>标签
 
     print(model)
 
     for epoch in range(N_EPOCHS):
-
         start_time = time.time()
 
-        train_loss = train_batch(model, train_data,de_vocab,en_vocab,BATCH_SIZE, optimizer, criterion, CLIP)
+        train_loss = train_batch(model, train_data, de_vocab, en_vocab, BATCH_SIZE, optimizer, criterion, CLIP)
         # valid_loss = evaluate(model, valid_iterator, criterion)
 
         end_time = time.time()
@@ -93,4 +89,6 @@ if __name__ == '__main__':
 
         print(f'Epoch: {epoch + 1:02} | Time: {epoch_mins}m {epoch_secs}s')
         print(f'\tTrain Loss: {train_loss:.3f} | Train PPL: {math.exp(train_loss):7.3f}')
+
+        torch.save(model.state_dict(), 'trained_model/model.pt')
         # print(f'\t Val. Loss: {valid_loss:.3f} |  Val. PPL: {math.exp(valid_loss):7.3f}')

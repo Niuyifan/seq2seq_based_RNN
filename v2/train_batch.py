@@ -10,17 +10,18 @@ def train_batch(model, data_set, src_vocab, trg_vocab, batch_size, optimizer, cr
     epoch_loss = 0
     epoch_num = 0
 
-    size = len(data_set)
-    indices = list(range(size))
+    indices = list(range(len(data_set)))
     if shuffle:
         random.shuffle(indices)
 
     start = 0
+    count = 0
 
-    while start < size:
-        end = start + batch_size if start + batch_size < size else size
+    while start < len(data_set):
+        count += 1
+        end = start + batch_size if start + batch_size < len(indices) else len(indices)
 
-        src, trg = get_batch_data(data_set[indices[start]:indices[end]], src_vocab, trg_vocab)
+        src, trg = get_batch_data(data_set, indices, start, end, src_vocab, trg_vocab)
 
         start = end
 
@@ -39,6 +40,8 @@ def train_batch(model, data_set, src_vocab, trg_vocab, batch_size, optimizer, cr
         # output : [(trg len - 1) * batch size, output dim]
 
         loss = criterion(output, trg)
+        print('第'+str(count)+'个batch的loss:',loss)
+
         loss.backward()
 
         torch.nn.utils.clip_grad_norm(model.parameters(), clip)
